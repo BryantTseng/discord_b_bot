@@ -3,6 +3,7 @@ use serenity::client::{Context, EventHandler};
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
 
+use crate::domain::message::RateUsecase;
 use crate::usecase::message::MessageUsecase;
 
 pub struct Handler;
@@ -26,6 +27,32 @@ impl EventHandler for Handler {
         } else if msg.content.starts_with("!echo ") {
             let r = MessageUsecase::echo(msg.content[6..].to_string());
             let _ = match msg.channel_id.say(&ctx.http, r).await {
+                Ok(v) => Ok(v),
+                Err(e) => {
+                    println!("{}", e);
+                    Err(e)
+                }
+            };
+        } else if msg.content.starts_with("!rate ") {
+            let r = MessageUsecase::echo(msg.content[6..].to_string());
+            let s = r.split_whitespace();
+            let mut curr = String::new();
+            let mut amount: f64 = 1.0;
+
+            let mut count = 0;
+            for each in s {
+                if count == 0 {
+                    curr = each.to_string();
+                } else if count == 1 {
+                    amount = each.parse::<f64>().unwrap();
+                } else {
+                    break;
+                }
+                count += 1;
+            }
+            let (result, rate) = MessageUsecase::get_rate(curr, amount).await;
+            let message = format!("{},{}", result, rate);
+            let _ = match msg.channel_id.say(&ctx.http, message).await {
                 Ok(v) => Ok(v),
                 Err(e) => {
                     println!("{}", e);
