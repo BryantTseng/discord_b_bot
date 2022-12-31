@@ -15,6 +15,6 @@ impl MessageUsecase {
 impl RateUsecase for MessageUsecase {
     async fn get_rate(s: String, amount: f64) -> (String, String) {
         let (result, rate) = RateRepository::get_rate(&s, amount).await;
-        (result.to_string(), rate.to_string())
+        (format!("{:.2}", result), format!("{:.5}", rate))
     }
 }

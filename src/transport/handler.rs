@@ -1,4 +1,3 @@
-use regex::Regex;
 use serenity::async_trait;
 use serenity::client::{Context, EventHandler};
 use serenity::model::channel::Message;
@@ -21,42 +20,42 @@ impl EventHandler for Handler {
         if msg.content.starts_with("!") == false {
             return;
         }
-        let re = Regex::new(r"!() .*$").unwrap();
-        let command: String = match re.find(&msg.content) {
-            Some(v) => v.as_str().to_string(),
-            None => "unknown".to_string(),
-        };
-
-        match command.as_str() {
-            "ping" => {
+        let command_split = msg.content.split_whitespace();
+        let mut args: Vec<&str> = Vec::new();
+        for each in command_split {
+            args.push(each);
+        }
+        match args[0] {
+            "!ping" => {
                 send_message(ctx, msg.channel_id, "pong".to_string()).await;
             }
-            "echo" => {
-                let message = MessageUsecase::echo(msg.content[6..].to_string());
+            "!echo" => {
+                let message = MessageUsecase::echo(args[1].to_string());
                 send_message(ctx, msg.channel_id, message).await;
             }
-            "rate" => {
-                let r = MessageUsecase::echo(msg.content[6..].to_string());
-                let s = r.split_whitespace();
-                let mut curr = String::new();
-                let mut amount: f64 = 1.0;
+            "!rate" => {
+                let curr: String;
+                let mut amount = 1.0;
 
-                let mut count = 0;
-                for each in s {
-                    if count == 0 {
-                        curr = each.to_string();
-                    } else if count == 1 {
-                        amount = each.parse::<f64>().unwrap();
-                    } else {
-                        break;
+                match args.len() {
+                    1 => {
+                        send_message(ctx, msg.channel_id, "是要哪個幣?".to_string()).await;
+                        return;
                     }
-                    count += 1;
+                    2 => {
+                        curr = args[1].to_string();
+                    }
+                    _ => {
+                        curr = args[1].to_string();
+                        amount = args[2].parse::<f64>().unwrap_or(1.0);
+                    }
                 }
+
                 let (result, rate) = MessageUsecase::get_rate(curr, amount).await;
                 let message = format!("{},{}", result, rate);
                 send_message(ctx, msg.channel_id, message).await;
             }
-            "unknown" => {
+            "!unknown" => {
                 let message = format!("{}", "會不會用?");
                 send_message(ctx, msg.channel_id, message).await;
             }
