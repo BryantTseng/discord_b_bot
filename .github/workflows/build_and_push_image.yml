@@ -36,4 +36,4 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: bt0724/b_bot:${{ steps.read_toml.outputs.value }})
+          tags: bt0724/b_bot:${{ steps.read_toml.outputs.value }}
