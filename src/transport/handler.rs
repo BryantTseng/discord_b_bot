@@ -4,7 +4,7 @@ use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
 use serenity::model::prelude::ChannelId;
 
-use crate::domain::message::RateUsecase;
+use crate::domain::message::{FoodUsecase, RateUsecase};
 use crate::usecase::message::MessageUsecase;
 
 pub struct Handler;
@@ -53,6 +53,14 @@ impl EventHandler for Handler {
 
                 let (result, rate) = MessageUsecase::get_rate(curr, amount).await;
                 let message = format!("{}/{}\nrate: {}", result, curr, rate);
+                send_message(ctx, msg.channel_id, message).await;
+            }
+            "!food" => {
+                let mut count = 1;
+                if args.len() > 2 {
+                    count = args[1].parse::<usize>().unwrap();
+                }
+                let message = MessageUsecase::get_food(count).await;
                 send_message(ctx, msg.channel_id, message).await;
             }
             _ => {

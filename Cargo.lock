@@ -64,9 +64,10 @@ dependencies = [
 
 [[package]]
 name = "bt_discord_bot"
-version = "0.1.6"
+version = "0.2.0"
 dependencies = [
  "dotenv",
+ "rand",
  "reqwest",
  "serde",
  "serenity",
