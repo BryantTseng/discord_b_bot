@@ -19,6 +19,6 @@ jobs:
           file: 'Cargo.toml'
           field: 'package.version'
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only -i bt0724/b_bot:${steps.read_toml.outputs.value}
+      - run: flyctl deploy --remote-only -i bt0724/b_bot:${{ steps.read_toml.outputs.value }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
