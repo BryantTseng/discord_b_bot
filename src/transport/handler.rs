@@ -57,7 +57,7 @@ impl EventHandler for Handler {
             }
             "!food" => {
                 let mut count = 1;
-                if args.len() > 2 {
+                if args.len() >= 2 {
                     count = args[1].parse::<usize>().unwrap();
                 }
                 let message = MessageUsecase::get_food(count).await;
