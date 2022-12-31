@@ -55,11 +55,10 @@ impl EventHandler for Handler {
                 let message = format!("{}/{}\nrate: {}", result, curr, rate);
                 send_message(ctx, msg.channel_id, message).await;
             }
-            "!unknown" => {
+            _ => {
                 let message = format!("{}", "會不會用?");
                 send_message(ctx, msg.channel_id, message).await;
             }
-            _ => {}
         }
     }
 
