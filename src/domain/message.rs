@@ -7,5 +7,5 @@ pub trait Rate {
 
 #[async_trait]
 pub trait RateUsecase {
-    async fn get_rate(currency: String, amount: f64) -> (String, String);
+    async fn get_rate(currency: &str, amount: f64) -> (String, String);
 }

@@ -34,7 +34,7 @@ impl EventHandler for Handler {
                 send_message(ctx, msg.channel_id, message).await;
             }
             "!rate" => {
-                let curr: String;
+                let curr: &str;
                 let mut amount = 1.0;
 
                 match args.len() {
@@ -43,16 +43,16 @@ impl EventHandler for Handler {
                         return;
                     }
                     2 => {
-                        curr = args[1].to_string();
+                        curr = args[1];
                     }
                     _ => {
-                        curr = args[1].to_string();
+                        curr = args[1];
                         amount = args[2].parse::<f64>().unwrap_or(1.0);
                     }
                 }
 
                 let (result, rate) = MessageUsecase::get_rate(curr, amount).await;
-                let message = format!("{},{}", result, rate);
+                let message = format!("{}/{}\nrate: {}", result, curr, rate);
                 send_message(ctx, msg.channel_id, message).await;
             }
             "!unknown" => {
