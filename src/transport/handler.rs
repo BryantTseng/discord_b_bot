@@ -1,7 +1,9 @@
+use regex::Regex;
 use serenity::async_trait;
 use serenity::client::{Context, EventHandler};
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
+use serenity::model::prelude::ChannelId;
 
 use crate::domain::message::RateUsecase;
 use crate::usecase::message::MessageUsecase;
@@ -16,49 +18,49 @@ impl EventHandler for Handler {
     // Event handlers are dispatched through a threadpool, and so multiple
     // events can be dispatched simultaneously.
     async fn message(&self, ctx: Context, msg: Message) {
-        if msg.content == "!ping" {
-            // Sending a message can fail, due to a network error, an
-            // authentication error, or lack of permissions to post in the
-            // channel, so log to stdout when some error happens, with a
-            // description of it.
-            if let Err(why) = msg.channel_id.say(&ctx.http, "Pong!").await {
-                println!("Error sending message: {:?}", why);
-            }
-        } else if msg.content.starts_with("!echo ") {
-            let r = MessageUsecase::echo(msg.content[6..].to_string());
-            let _ = match msg.channel_id.say(&ctx.http, r).await {
-                Ok(v) => Ok(v),
-                Err(e) => {
-                    println!("{}", e);
-                    Err(e)
-                }
-            };
-        } else if msg.content.starts_with("!rate ") {
-            let r = MessageUsecase::echo(msg.content[6..].to_string());
-            let s = r.split_whitespace();
-            let mut curr = String::new();
-            let mut amount: f64 = 1.0;
+        if msg.content.starts_with("!") == false {
+            return;
+        }
+        let re = Regex::new(r"!() .*$").unwrap();
+        let command: String = match re.find(&msg.content) {
+            Some(v) => v.as_str().to_string(),
+            None => "unknown".to_string(),
+        };
 
-            let mut count = 0;
-            for each in s {
-                if count == 0 {
-                    curr = each.to_string();
-                } else if count == 1 {
-                    amount = each.parse::<f64>().unwrap();
-                } else {
-                    break;
-                }
-                count += 1;
+        match command.as_str() {
+            "ping" => {
+                send_message(ctx, msg.channel_id, "pong".to_string()).await;
             }
-            let (result, rate) = MessageUsecase::get_rate(curr, amount).await;
-            let message = format!("{},{}", result, rate);
-            let _ = match msg.channel_id.say(&ctx.http, message).await {
-                Ok(v) => Ok(v),
-                Err(e) => {
-                    println!("{}", e);
-                    Err(e)
+            "echo" => {
+                let message = MessageUsecase::echo(msg.content[6..].to_string());
+                send_message(ctx, msg.channel_id, message).await;
+            }
+            "rate" => {
+                let r = MessageUsecase::echo(msg.content[6..].to_string());
+                let s = r.split_whitespace();
+                let mut curr = String::new();
+                let mut amount: f64 = 1.0;
+
+                let mut count = 0;
+                for each in s {
+                    if count == 0 {
+                        curr = each.to_string();
+                    } else if count == 1 {
+                        amount = each.parse::<f64>().unwrap();
+                    } else {
+                        break;
+                    }
+                    count += 1;
                 }
-            };
+                let (result, rate) = MessageUsecase::get_rate(curr, amount).await;
+                let message = format!("{},{}", result, rate);
+                send_message(ctx, msg.channel_id, message).await;
+            }
+            "unknown" => {
+                let message = format!("{}", "會不會用?");
+                send_message(ctx, msg.channel_id, message).await;
+            }
+            _ => {}
         }
     }
 
@@ -71,4 +73,13 @@ impl EventHandler for Handler {
     async fn ready(&self, _: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
     }
+}
+async fn send_message(ctx: Context, channel_id: ChannelId, msg: String) {
+    let _ = match channel_id.say(&ctx.http, msg).await {
+        Ok(v) => Ok(v),
+        Err(e) => {
+            println!("{}", e);
+            Err(e)
+        }
+    };
 }

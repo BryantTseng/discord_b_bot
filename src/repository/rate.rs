@@ -13,17 +13,16 @@ impl Rate for RateRepository {
             amount, currency
         );
 
-        //let body = reqwest::get(url).await.unwrap().text().await.unwrap();
         let resp = reqwest::get(url)
             .await
             .unwrap()
             .json::<QueryCurrencyResult>()
             .await
             .unwrap();
-        //println!("{:#?}", resp);
         (resp.result, resp.info.rate)
     }
 }
+#[allow(dead_code)]
 #[derive(Deserialize)]
 struct QueryCurrencyResult {
     motd: Motd,
@@ -34,11 +33,14 @@ struct QueryCurrencyResult {
     date: String,
     result: f64,
 }
+#[allow(dead_code)]
+#[allow(dead_code)]
 #[derive(Deserialize)]
 struct Motd {
     msg: String,
     url: String,
 }
+#[allow(dead_code)]
 #[derive(Deserialize)]
 struct Query {
     from: String,
