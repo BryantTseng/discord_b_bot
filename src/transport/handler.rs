@@ -37,7 +37,7 @@ impl EventHandler for Handler {
                 let message = MessageUsecase::get_rate(args[1..args.len()].to_vec()).await;
                 send_message(ctx, msg.channel_id, message).await;
             }
-            "!food" => {
+            "!food" | "!吃啥" => {
                 let message = MessageUsecase::get_food(args[1..args.len()].to_vec()).await;
                 send_message(ctx, msg.channel_id, message).await;
             }
