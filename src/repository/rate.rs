@@ -51,3 +51,16 @@ struct Query {
 struct Info {
     rate: f64,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn get_jpy_rate() {
+        let (result, rate) = RateRepository::get_rate("JPY", 1.0).await;
+
+        assert!(result.is_normal());
+        assert!(rate.is_normal());
+    }
+}

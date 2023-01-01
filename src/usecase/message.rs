@@ -45,3 +45,28 @@ impl FoodUsecase for MessageUsecase {
         foods.join(",")
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use regex::Regex;
+    #[tokio::test]
+    async fn get_jpy_rate_string() {
+        let r = MessageUsecase::get_rate(vec!["JPY", "3000"]).await;
+
+        let re = Regex::new(r"[0-9.]+/JPY\nrate: [0-9.]+").unwrap();
+        assert!(re.is_match(&r));
+    }
+    #[tokio::test]
+    async fn get_food_string() {
+        let r = MessageUsecase::get_food(vec!["1"]).await;
+        assert!(r.is_empty()==false)
+    }
+    #[tokio::test]
+    async fn get_food_string_without_number() {
+        let r = MessageUsecase::get_food(vec![]).await;
+        assert!(r.is_empty()==false)
+
+    }
+
+}

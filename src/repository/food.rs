@@ -58,3 +58,25 @@ impl Food for FoodRepository {
         result
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn get_one_food() {
+        let food = FoodRepository::get_food(1).await;
+
+        assert_eq!(1, food.len());
+        assert!(FOOD_LIST.contains(&food[0].as_str()));
+    }
+    #[tokio::test]
+    async fn get_multiple_food() {
+        let foods = FoodRepository::get_food(3).await;
+
+        assert_eq!(3, foods.len());
+        for each in foods {
+            assert!(FOOD_LIST.contains(&each.as_str()));
+        }
+    }
+}
