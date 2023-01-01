@@ -7,7 +7,7 @@ pub trait Rate {
 
 #[async_trait]
 pub trait RateUsecase {
-    async fn get_rate(currency: &str, amount: f64) -> (String, String);
+    async fn get_rate(args: Vec<&str>) -> String;
 }
 
 #[async_trait]
@@ -17,5 +17,5 @@ pub trait Food {
 
 #[async_trait]
 pub trait FoodUsecase {
-    async fn get_food(count: usize) -> String;
+    async fn get_food(args: Vec<&str>) -> String;
 }

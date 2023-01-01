@@ -30,37 +30,15 @@ impl EventHandler for Handler {
                 send_message(ctx, msg.channel_id, "pong".to_string()).await;
             }
             "!echo" => {
-                let message = MessageUsecase::echo(args[1].to_string());
+                let message = MessageUsecase::echo(args[1..args.len()].to_vec());
                 send_message(ctx, msg.channel_id, message).await;
             }
             "!rate" => {
-                let curr: &str;
-                let mut amount = 1.0;
-
-                match args.len() {
-                    1 => {
-                        send_message(ctx, msg.channel_id, "是要哪個幣?".to_string()).await;
-                        return;
-                    }
-                    2 => {
-                        curr = args[1];
-                    }
-                    _ => {
-                        curr = args[1];
-                        amount = args[2].parse::<f64>().unwrap_or(1.0);
-                    }
-                }
-
-                let (result, rate) = MessageUsecase::get_rate(curr, amount).await;
-                let message = format!("{}/{}\nrate: {}", result, curr, rate);
+                let message = MessageUsecase::get_rate(args[1..args.len()].to_vec()).await;
                 send_message(ctx, msg.channel_id, message).await;
             }
             "!food" => {
-                let mut count = 1;
-                if args.len() >= 2 {
-                    count = args[1].parse::<usize>().unwrap();
-                }
-                let message = MessageUsecase::get_food(count).await;
+                let message = MessageUsecase::get_food(args[1..args.len()].to_vec()).await;
                 send_message(ctx, msg.channel_id, message).await;
             }
             _ => {
