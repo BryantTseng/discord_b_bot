@@ -54,7 +54,7 @@ impl LolUsecase for MessageUsecase {
             people_need = e.parse::<u32>().unwrap_or(4);
         }
         //let people_need = args[0].parse::<u32>().unwrap_or(4);
-        format!("@everyone 打Lol -{}", people_need)
+        format!("@打lol -{}", people_need)
     }
 }
 
