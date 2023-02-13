@@ -4,7 +4,7 @@ use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
 use serenity::model::prelude::ChannelId;
 
-use crate::domain::message::{FoodUsecase, RateUsecase};
+use crate::domain::message::{FoodUsecase, LolUsecase, RateUsecase};
 use crate::usecase::message::MessageUsecase;
 
 pub struct Handler;
@@ -39,6 +39,10 @@ impl EventHandler for Handler {
             }
             "!food" | "!吃啥" => {
                 let message = MessageUsecase::get_food(args[1..args.len()].to_vec()).await;
+                send_message(ctx, msg.channel_id, message).await;
+            }
+            "!lol" => {
+                let message = MessageUsecase::ping_channel(args[1..args.len()].to_vec()).await;
                 send_message(ctx, msg.channel_id, message).await;
             }
             _ => {

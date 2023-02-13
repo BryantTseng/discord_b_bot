@@ -19,3 +19,8 @@ pub trait Food {
 pub trait FoodUsecase {
     async fn get_food(args: Vec<&str>) -> String;
 }
+
+#[async_trait]
+pub trait LolUsecase {
+    async fn ping_channel(args: Vec<&str>) -> String;
+}
