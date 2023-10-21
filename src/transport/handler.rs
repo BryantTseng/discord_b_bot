@@ -1,11 +1,11 @@
-use crate::domain::message::{self, FoodUsecase, LolUsecase, RateUsecase};
+use crate::domain::message::{FoodUsecase, LolUsecase, RateUsecase};
 use crate::usecase::message::MessageUsecase;
 use serenity::async_trait;
 use serenity::client::{Context, EventHandler};
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
 use serenity::model::prelude::ChannelId;
-use url::{ParseError, Url};
+use url::Url;
 
 pub struct Handler;
 
@@ -19,8 +19,8 @@ impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
         if msg.content.starts_with('!') {
             command_handler(ctx, &msg).await;
-        } else if Url::parse(&msg.content).is_ok() {
-            url_handler(ctx, &msg).await;
+        } else if let Ok(url) = Url::parse(&msg.content) {
+            url_handler(ctx, &msg, url).await;
         }
     }
 
@@ -79,12 +79,21 @@ async fn command_handler(ctx: Context, msg: &Message) {
 }
 
 /// This handler would handle message which is a valid URL
-async fn url_handler(ctx: Context, msg: &Message) {
-    if msg.content.starts_with("https://twitter.com") {
-        let message = format!("{}", msg.content.replace("https://", "https://vx"));
-        send_message(ctx, msg.channel_id, message).await;
-    } else if msg.content.starts_with("https://x.com") {
-        let message = format!("{}", msg.content.replace("https://x", "https://vxtwitter"));
-        send_message(ctx, msg.channel_id, message).await;
+async fn url_handler(ctx: Context, msg: &Message, url: Url) {
+    if let Some(host) = url.host() {
+        match host.to_string().as_str() {
+            "https://twitter.com" | "https://x.com" => {
+                let message;
+                let mut url = url.clone();
+                if let Err(e) = url.set_host(Some("vxtwitter.com")) {
+                    message = format!("fuck, {}", e);
+                } else {
+                    message = url.to_string();
+                }
+
+                send_message(ctx, msg.channel_id, message).await;
+            }
+            _ => {}
+        }
     }
 }
