@@ -82,7 +82,7 @@ async fn command_handler(ctx: Context, msg: &Message) {
 async fn url_handler(ctx: Context, msg: &Message, url: Url) {
     if let Some(host) = url.host() {
         match host.to_string().as_str() {
-            "https://twitter.com" | "https://x.com" => {
+            "twitter.com" | "x.com" => {
                 let message;
                 let mut url = url.clone();
                 if let Err(e) = url.set_host(Some("vxtwitter.com")) {
