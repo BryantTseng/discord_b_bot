@@ -1,11 +1,11 @@
+use crate::domain::message::{self, FoodUsecase, LolUsecase, RateUsecase};
+use crate::usecase::message::MessageUsecase;
 use serenity::async_trait;
 use serenity::client::{Context, EventHandler};
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
 use serenity::model::prelude::ChannelId;
-
-use crate::domain::message::{FoodUsecase, LolUsecase, RateUsecase};
-use crate::usecase::message::MessageUsecase;
+use url::{ParseError, Url};
 
 pub struct Handler;
 
@@ -18,42 +18,9 @@ impl EventHandler for Handler {
     // events can be dispatched simultaneously.
     async fn message(&self, ctx: Context, msg: Message) {
         if msg.content.starts_with('!') {
-            let command_split = msg.content.split_whitespace();
-            let mut args: Vec<&str> = Vec::new();
-            for each in command_split {
-                args.push(each);
-            }
-            match args[0] {
-                "!ping" => {
-                    send_message(ctx, msg.channel_id, "pong".to_string()).await;
-                }
-                "!echo" => {
-                    let message = MessageUsecase::echo(args[1..args.len()].to_vec());
-                    send_message(ctx, msg.channel_id, message).await;
-                }
-                "!rate" => {
-                    let message = MessageUsecase::get_rate(args[1..args.len()].to_vec()).await;
-                    send_message(ctx, msg.channel_id, message).await;
-                }
-                "!food" | "!吃啥" => {
-                    let message = MessageUsecase::get_food(args[1..args.len()].to_vec()).await;
-                    send_message(ctx, msg.channel_id, message).await;
-                }
-                "!lol" => {
-                    let message = MessageUsecase::ping_channel(args[1..args.len()].to_vec()).await;
-                    send_message(ctx, msg.channel_id, message).await;
-                }
-                _ => {
-                    let message = format!("{}", "會不會用?");
-                    send_message(ctx, msg.channel_id, message).await;
-                }
-            }
-        } else if msg.content.starts_with("https://twitter.com") {
-            let message = format!("{}", msg.content.replace("https://", "https://vx"));
-            send_message(ctx, msg.channel_id, message).await;
-        } else if msg.content.starts_with("https://x.com") {
-            let message = format!("{}", msg.content.replace("https://x", "https://vxtwitter"));
-            send_message(ctx, msg.channel_id, message).await;
+            command_handler(ctx, &msg).await;
+        } else if Url::parse(&msg.content).is_ok() {
+            url_handler(ctx, &msg).await;
         }
     }
 
@@ -75,4 +42,49 @@ async fn send_message(ctx: Context, channel_id: ChannelId, msg: String) {
             Err(e)
         }
     };
+}
+
+/// This handler would handle message start with '!'
+async fn command_handler(ctx: Context, msg: &Message) {
+    let command_split = msg.content.split_whitespace();
+    let mut args: Vec<&str> = Vec::new();
+    for each in command_split {
+        args.push(each);
+    }
+    match args[0] {
+        "!ping" => {
+            send_message(ctx, msg.channel_id, "pong".to_string()).await;
+        }
+        "!echo" => {
+            let message = MessageUsecase::echo(args[1..args.len()].to_vec());
+            send_message(ctx, msg.channel_id, message).await;
+        }
+        "!rate" => {
+            let message = MessageUsecase::get_rate(args[1..args.len()].to_vec()).await;
+            send_message(ctx, msg.channel_id, message).await;
+        }
+        "!food" | "!吃啥" => {
+            let message = MessageUsecase::get_food(args[1..args.len()].to_vec()).await;
+            send_message(ctx, msg.channel_id, message).await;
+        }
+        "!lol" => {
+            let message = MessageUsecase::ping_channel(args[1..args.len()].to_vec()).await;
+            send_message(ctx, msg.channel_id, message).await;
+        }
+        _ => {
+            let message = format!("{}", "會不會用?");
+            send_message(ctx, msg.channel_id, message).await;
+        }
+    }
+}
+
+/// This handler would handle message which is a valid URL
+async fn url_handler(ctx: Context, msg: &Message) {
+    if msg.content.starts_with("https://twitter.com") {
+        let message = format!("{}", msg.content.replace("https://", "https://vx"));
+        send_message(ctx, msg.channel_id, message).await;
+    } else if msg.content.starts_with("https://x.com") {
+        let message = format!("{}", msg.content.replace("https://x", "https://vxtwitter"));
+        send_message(ctx, msg.channel_id, message).await;
+    }
 }
