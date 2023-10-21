@@ -17,46 +17,43 @@ impl EventHandler for Handler {
     // Event handlers are dispatched through a threadpool, and so multiple
     // events can be dispatched simultaneously.
     async fn message(&self, ctx: Context, msg: Message) {
-        if msg.content.starts_with("!") == false {
-            if msg.content.starts_with("https://twitter.com") == true {
-                let message = format!("{}", msg.content.replace("https://", "https://vx"));
-                send_message(ctx, msg.channel_id, message).await;
-            } else if msg.content.starts_with("https://x.com") == true {
-                let message = format!("{}", msg.content.replace("https://x", "https://vxtwitter"));
-                send_message(ctx, msg.channel_id, message).await;
-            } else {
-                return;
+        if msg.content.starts_with('!') {
+            let command_split = msg.content.split_whitespace();
+            let mut args: Vec<&str> = Vec::new();
+            for each in command_split {
+                args.push(each);
             }
-        }
-        let command_split = msg.content.split_whitespace();
-        let mut args: Vec<&str> = Vec::new();
-        for each in command_split {
-            args.push(each);
-        }
-        match args[0] {
-            "!ping" => {
-                send_message(ctx, msg.channel_id, "pong".to_string()).await;
+            match args[0] {
+                "!ping" => {
+                    send_message(ctx, msg.channel_id, "pong".to_string()).await;
+                }
+                "!echo" => {
+                    let message = MessageUsecase::echo(args[1..args.len()].to_vec());
+                    send_message(ctx, msg.channel_id, message).await;
+                }
+                "!rate" => {
+                    let message = MessageUsecase::get_rate(args[1..args.len()].to_vec()).await;
+                    send_message(ctx, msg.channel_id, message).await;
+                }
+                "!food" | "!吃啥" => {
+                    let message = MessageUsecase::get_food(args[1..args.len()].to_vec()).await;
+                    send_message(ctx, msg.channel_id, message).await;
+                }
+                "!lol" => {
+                    let message = MessageUsecase::ping_channel(args[1..args.len()].to_vec()).await;
+                    send_message(ctx, msg.channel_id, message).await;
+                }
+                _ => {
+                    let message = format!("{}", "會不會用?");
+                    send_message(ctx, msg.channel_id, message).await;
+                }
             }
-            "!echo" => {
-                let message = MessageUsecase::echo(args[1..args.len()].to_vec());
-                send_message(ctx, msg.channel_id, message).await;
-            }
-            "!rate" => {
-                let message = MessageUsecase::get_rate(args[1..args.len()].to_vec()).await;
-                send_message(ctx, msg.channel_id, message).await;
-            }
-            "!food" | "!吃啥" => {
-                let message = MessageUsecase::get_food(args[1..args.len()].to_vec()).await;
-                send_message(ctx, msg.channel_id, message).await;
-            }
-            "!lol" => {
-                let message = MessageUsecase::ping_channel(args[1..args.len()].to_vec()).await;
-                send_message(ctx, msg.channel_id, message).await;
-            }
-            _ => {
-                let message = format!("{}", "會不會用?");
-                send_message(ctx, msg.channel_id, message).await;
-            }
+        } else if msg.content.starts_with("https://twitter.com") {
+            let message = format!("{}", msg.content.replace("https://", "https://vx"));
+            send_message(ctx, msg.channel_id, message).await;
+        } else if msg.content.starts_with("https://x.com") {
+            let message = format!("{}", msg.content.replace("https://x", "https://vxtwitter"));
+            send_message(ctx, msg.channel_id, message).await;
         }
     }
 
