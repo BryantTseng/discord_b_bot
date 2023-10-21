@@ -18,7 +18,15 @@ impl EventHandler for Handler {
     // events can be dispatched simultaneously.
     async fn message(&self, ctx: Context, msg: Message) {
         if msg.content.starts_with("!") == false {
-            return;
+            if msg.content.starts_with("https://twitter.com") == true {
+                let message = format!("{}", msg.content.replace("https://", "https://vx"));
+                send_message(ctx, msg.channel_id, message).await;
+            } else if msg.content.starts_with("https://x.com") == true {
+                let message = format!("{}", msg.content.replace("https://x", "https://vxtwitter"));
+                send_message(ctx, msg.channel_id, message).await;
+            } else {
+                return;
+            }
         }
         let command_split = msg.content.split_whitespace();
         let mut args: Vec<&str> = Vec::new();
