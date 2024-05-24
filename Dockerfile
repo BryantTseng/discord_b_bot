@@ -5,7 +5,7 @@ COPY Cargo.lock Cargo.lock
 COPY src/ src/
 RUN cargo install --path .
 
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 RUN apt-get update
 RUN apt-get install -y ca-certificates
 COPY --from=builder /usr/local/cargo/bin/bt_discord_bot /usr/local/bin/bt_discord_bot
