@@ -6,7 +6,7 @@ kill_timeout = 5
 processes = []
 
 [build]
-  image = "bt0724/b_bot:0.1.2"
+  image = "bt0724/b_bot:1.2.0"
 
 [env]
 
