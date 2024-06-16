@@ -1,6 +1,6 @@
 use serenity::async_trait;
 
-use crate::domain::message::{Food, FoodUsecase, LolUsecase, Rate, RateUsecase};
+use crate::domain::message::{Food, FoodUsecase, LolUsecase, Rate, RateUsecase, SystemUsecase};
 use crate::repository::food::FoodRepository;
 use crate::repository::rate::RateRepository;
 pub struct MessageUsecase;
@@ -55,6 +55,14 @@ impl LolUsecase for MessageUsecase {
         }
         //let people_need = args[0].parse::<u32>().unwrap_or(4);
         format!("@everyone 上線 -{}", people_need)
+    }
+}
+const CARGO_PKG_VERSION: &str = env!("CARGO_PKG_VERSION");
+
+#[async_trait]
+impl SystemUsecase for MessageUsecase {
+    async fn get_version(_args: Vec<&str>) -> String {
+        return CARGO_PKG_VERSION.to_string()
     }
 }
 

@@ -24,3 +24,8 @@ pub trait FoodUsecase {
 pub trait LolUsecase {
     async fn ping_channel(args: Vec<&str>) -> String;
 }
+
+#[async_trait]
+pub trait SystemUsecase {
+    async fn get_version(args: Vec<&str>) -> String;
+}

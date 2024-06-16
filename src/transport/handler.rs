@@ -1,4 +1,4 @@
-use crate::domain::message::{FoodUsecase, LolUsecase, RateUsecase};
+use crate::domain::message::{FoodUsecase, LolUsecase, RateUsecase, SystemUsecase};
 use crate::usecase::message::MessageUsecase;
 use serenity::async_trait;
 use serenity::client::{Context, EventHandler};
@@ -65,6 +65,10 @@ async fn command_handler(ctx: Context, msg: &Message) {
         }
         "!food" | "!吃啥" => {
             let message = MessageUsecase::get_food(args[1..args.len()].to_vec()).await;
+            send_message(ctx, msg.channel_id, message).await;
+        }
+        "!version"| "!ver" => {
+            let message = MessageUsecase::get_version(args[1..args.len()].to_vec()).await;
             send_message(ctx, msg.channel_id, message).await;
         }
         "!lol" => {
