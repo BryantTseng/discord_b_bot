@@ -1,5 +1,5 @@
 use serenity::{
-    all::{Context, EventHandler, GatewayIntents, Message, Ready},
+    all::{ChannelId, Context, EventHandler, GatewayIntents, Message, Ready},
     async_trait, Client,
 };
 use url::Url;
@@ -22,9 +22,11 @@ impl EventHandler for DiscordHandler {
     // events can be dispatched simultaneously.
     async fn message(&self, ctx: Context, msg: Message) {
         if msg.content.starts_with('!') {
-            let res = MessageUsecase::execute_command(msg.content);
+            let res = MessageUsecase::execute_command(msg.content).await;
+            self.send_message(ctx, msg.channel_id, res).await;
         } else if let Ok(url) = Url::parse(&msg.content) {
             let res = MessageUsecase::execute_url(url);
+            self.send_message(ctx, msg.channel_id, res).await;
         }
     }
 
@@ -38,7 +40,17 @@ impl EventHandler for DiscordHandler {
         println!("{} is connected!", ready.user.name);
     }
 }
-
+impl DiscordHandler {
+    async fn send_message(&self, ctx: Context, channel_id: ChannelId, msg: String) {
+        let _ = match channel_id.say(&ctx.http, msg).await {
+            Ok(v) => Ok(v),
+            Err(e) => {
+                println!("{}", e);
+                Err(e)
+            }
+        };
+    }
+}
 impl Discord {
     pub async fn new(config: Config) -> Self {
         // Set gateway intents, which decides what events the bot will be notified about
