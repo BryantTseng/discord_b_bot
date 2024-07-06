@@ -4,7 +4,7 @@ use serenity::{
 };
 use url::Url;
 
-use crate::{usecase::message::MessageUsecase, utils::config::Config};
+use crate::{cli::CLIInstance, utils::config::Config};
 
 pub struct Discord {
     config: Config,
@@ -22,11 +22,13 @@ impl EventHandler for DiscordHandler {
     // events can be dispatched simultaneously.
     async fn message(&self, ctx: Context, msg: Message) {
         if msg.content.starts_with('!') {
-            let res = MessageUsecase::execute_command(msg.content).await;
+            let cli = CLIInstance::new();
+            let res = cli.execute(msg.content.clone()).await;
             self.send_message(ctx, msg.channel_id, res).await;
         } else if let Ok(url) = Url::parse(&msg.content) {
-            let res = MessageUsecase::execute_url(url);
-            self.send_message(ctx, msg.channel_id, res).await;
+            if let Some(res) = url_handler(url).await {
+                self.send_message(ctx, msg.channel_id, res).await;
+            }
         }
     }
 
@@ -82,4 +84,22 @@ impl Discord {
             println!("Client error: {:?}", why);
         }
     }
+}
+async fn url_handler(url: Url) -> Option<String> {
+    if let Some(host) = url.host() {
+        match host.to_string().as_str() {
+            "twitter.com" | "x.com" => {
+                let message;
+                let mut url = url.clone();
+                if let Err(e) = url.set_host(Some("vxtwitter.com")) {
+                    message = format!("fuck, {}", e);
+                } else {
+                    message = url.to_string();
+                }
+                return Some(message);
+            }
+            _ => return None,
+        }
+    }
+    None
 }

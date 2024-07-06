@@ -1,7 +1,6 @@
-mod domain;
+mod cli;
 mod repository;
 mod transport;
-mod usecase;
 mod utils;
 
 use transport::discord::Discord;

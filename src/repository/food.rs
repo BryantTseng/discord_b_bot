@@ -1,7 +1,5 @@
 use rand::seq::SliceRandom;
-use serenity::async_trait;
 
-use crate::domain::message::Food;
 pub struct FoodRepository;
 
 static FOOD_LIST: [&str; 39] = [
@@ -46,9 +44,8 @@ static FOOD_LIST: [&str; 39] = [
     "酸辣湯餃",
 ];
 
-#[async_trait]
-impl Food for FoodRepository {
-    async fn get_food(num: usize) -> Vec<String> {
+impl FoodRepository {
+    pub fn get_food(num: usize) -> Vec<String> {
         let mut rng = &mut rand::thread_rng();
         let result: Vec<String> = FOOD_LIST
             .choose_multiple(&mut rng, num)
@@ -65,14 +62,14 @@ mod tests {
 
     #[tokio::test]
     async fn get_one_food() {
-        let food = FoodRepository::get_food(1).await;
+        let food = FoodRepository::get_food(1);
 
         assert_eq!(1, food.len());
         assert!(FOOD_LIST.contains(&food[0].as_str()));
     }
     #[tokio::test]
     async fn get_multiple_food() {
-        let foods = FoodRepository::get_food(3).await;
+        let foods = FoodRepository::get_food(3);
 
         assert_eq!(3, foods.len());
         for each in foods {
