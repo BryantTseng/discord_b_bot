@@ -1,13 +1,9 @@
 use serde::Deserialize;
-use serenity::async_trait;
-
-use crate::domain::message::Rate;
 
 pub struct RateRepository;
 
-#[async_trait]
-impl Rate for RateRepository {
-    async fn get_rate(currency: &str, amount: f64) -> (f64, f64) {
+impl RateRepository {
+    pub async fn get_rate(currency: &str, amount: f64) -> (f64, f64) {
         let url = format!(
             "https://api.exchangerate.host/convert?amount={}&from={}&to=TWD",
             amount, currency
