@@ -89,6 +89,9 @@ async fn url_handler(url: Url) -> Option<String> {
     if let Some(host) = url.host() {
         match host.to_string().as_str() {
             "twitter.com" | "x.com" => {
+                if !url.path().contains("/status/") {
+                    return None;
+                }
                 let message;
                 let mut url = url.clone();
                 if let Err(e) = url.set_host(Some("vxtwitter.com")) {
